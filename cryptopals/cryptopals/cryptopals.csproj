@@ -70,6 +70,7 @@
     <Content Include="set1challenge4.txt" />
     <Content Include="set1challenge6.txt" />
     <Content Include="set1challenge7.txt" />
+    <Content Include="set1challenge8.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">

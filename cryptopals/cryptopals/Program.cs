@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace cryptopals
 {
@@ -55,7 +56,6 @@ namespace cryptopals
             string expect = "746865206b696420646f6e277420706c6179";
             string output = BitConverter.ToString(BinaryOperations.Xor(BinaryOperations.HexToBytes(input), BinaryOperations.HexToBytes(key))).Replace("-", string.Empty);
             Console.WriteLine("Set 1 Challenge 2: " + expect.ToUpper().Equals(output.ToUpper()));
-            Console.WriteLine("Set 1 Challenge 2: (input) " + Encoding.ASCII.GetString(BinaryOperations.HexToBytes(input)));
             Console.WriteLine("Set 1 Challenge 2: (key) " + Encoding.ASCII.GetString(BinaryOperations.HexToBytes(key)));
             Console.WriteLine("Set 1 Challenge 2: (expect) " + Encoding.ASCII.GetString(BinaryOperations.HexToBytes(expect)));
         }
@@ -87,12 +87,12 @@ namespace cryptopals
          */
         static void Set1Challenge4()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"../../set1challenge4.txt");
+            string[] lines = File.ReadAllLines(@"../../set1challenge4.txt");
             List<byte[]> input = new List<byte[]>();
             foreach (string line in lines)
                 input.Add(BinaryOperations.HexToBytes(line));
             string output = Decoder.SingleXorDecrypt(input)[0].Item2;
-            Console.WriteLine("Set 1 Challenge 4: " + output);
+            Console.WriteLine("Set 1 Challenge 4: " + output.Trim());
         }
 
         /* Implement repeating-key XOR
@@ -146,11 +146,11 @@ namespace cryptopals
          */
         static void Set1Challenge6()
         {
-            string input = System.IO.File.ReadAllText(@"../../set1challenge6.txt");
+            string input = File.ReadAllText(@"../../set1challenge6.txt");
             byte[] cyphertext = Convert.FromBase64String(input);
             byte[] key = Decoder.Vigenere(cyphertext);
-            Console.WriteLine("Set 1 Challenge 6: used key => " + Encoding.ASCII.GetString(key));
-            Console.WriteLine(Encoding.ASCII.GetString(BinaryOperations.Xor(cyphertext, key)).Replace("-", string.Empty));
+            Console.WriteLine("Set 1 Challenge 6: used key =>" + Encoding.ASCII.GetString(key));
+            Console.WriteLine("Set 1 Challenge 6: " + Encoding.ASCII.GetString(BinaryOperations.Xor(cyphertext, key)).Replace(" - ", string.Empty).Substring(0, 32));
         }
 
         /* AES in ECB mode
@@ -166,7 +166,11 @@ namespace cryptopals
         static void Set1Challenge7()
         {
             string key = "YELLOW SUBMARINE";
-            System.Security.Cryptography.Aes aes;
+            string input = File.ReadAllText(@"../../set1challenge7.txt");
+            byte[] cipher = Convert.FromBase64String(input);
+            string plaintext;
+            plaintext = Encoding.ASCII.GetString(Decoder.AesEcb128Decrypt(cipher, Encoding.UTF8.GetBytes(key)));
+            Console.WriteLine("Set 1 Challenge 7: " + plaintext.Substring(0,32));
         }
 
         /* Detect AES in ECB mode
@@ -177,7 +181,25 @@ namespace cryptopals
          */
         static void Set1Challenge8()
         {
-
+            string[] input = File.ReadAllLines(@"../../set1challenge8.txt");
+            List<string> ciphers = new List<string>();
+            List<Tuple<string, int>> freq = new List<Tuple<string, int>>();
+            foreach (string c in input)
+            {
+                Dictionary<string, int> duplicates = new Dictionary<string, int>();
+                for (int i = 0; i < c.Length / 16; i++)
+                {
+                    string block = c.Substring(i * 16, 16);
+                    if (duplicates.ContainsKey(block))
+                        duplicates[block]++;
+                    else
+                        duplicates.Add(block, 1);
+                }
+                freq.Add(new Tuple<string, int>(c, duplicates.Keys.Count));
+            }
+            freq.Sort((x, y) => x.Item2.CompareTo(y.Item2));
+            Console.WriteLine("Set 1 Challenge 8: duplicate count =>" + (20-freq[0].Item2));
+            Console.WriteLine("Set 1 Challenge 8: ciphertext =>" + freq[0].Item1.Substring(0,32));
         }
     }
 }

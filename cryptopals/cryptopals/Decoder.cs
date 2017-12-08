@@ -119,5 +119,16 @@ namespace cryptopals
             word_scores.Sort((x, y) => y.Item1.CompareTo(x.Item1));
             return word_scores[0].Item2;
         }
+
+        public static byte[] AesEcb128Decrypt(byte[] cipher, byte[] key)
+        {
+            System.Security.Cryptography.AesManaged aes = new System.Security.Cryptography.AesManaged
+            {
+                Key = key,
+                Mode = System.Security.Cryptography.CipherMode.ECB
+            };
+            System.Security.Cryptography.ICryptoTransform decryptor = aes.CreateDecryptor();
+            return decryptor.TransformFinalBlock(cipher, 0, cipher.Length);
+        }
     }
 }
