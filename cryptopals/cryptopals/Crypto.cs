@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace cryptopals
 {
-    public static class Decoder
+    public static class Crypto
     {
         static Dictionary<char, int> frequency = new Dictionary<char, int>(){
             {'A', 6532},
@@ -129,6 +129,26 @@ namespace cryptopals
             };
             System.Security.Cryptography.ICryptoTransform decryptor = aes.CreateDecryptor();
             return decryptor.TransformFinalBlock(cipher, 0, cipher.Length);
+        }
+
+        public static string DetectAesEcb(string[] input)
+        {
+            List<Tuple<string, int>> freq = new List<Tuple<string, int>>();
+            foreach (string c in input)
+            {
+                Dictionary<string, int> duplicates = new Dictionary<string, int>();
+                for (int i = 0; i < c.Length / 16; i++)
+                {
+                    string block = c.Substring(i * 16, 16);
+                    if (duplicates.ContainsKey(block))
+                        duplicates[block]++;
+                    else
+                        duplicates.Add(block, 1);
+                }
+                freq.Add(new Tuple<string, int>(c, duplicates.Keys.Count));
+            }
+            freq.Sort((x, y) => x.Item2.CompareTo(y.Item2));
+            return freq[0].Item1;
         }
     }
 }
